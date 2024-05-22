@@ -1,5 +1,5 @@
 {% set name = "liquidprompt" %}
-{% set version = "2.1.2" %}
+{% set version = "2.2.0" %}
 
 package:
   name: {{ name|lower }}
@@ -8,7 +8,7 @@ package:
 source:
   fn: {{ name }}-{{ version }}.tar.gz
   url: https://github.com/{{ name }}/{{ name }}/archive/v{{ version }}.tar.gz
-  sha256: f752f46595519befd1ad83eaa3605cfc05babd485250a0b46916d8eacabf4f26
+  sha256: 8fcfd3a192f6f484cd29e0c5bea02564adf0ee524d6dfad52307ca9d54bffd15
 
 build:
   number: 0
