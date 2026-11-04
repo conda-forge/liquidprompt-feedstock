@@ -12,6 +12,11 @@ source:
 
 build:
   number: 1
+  # The c stdlib is only in the build requirements to satisfy the osx CI
+  # build scripts; its run_exports would otherwise pin __osx >=11.0 on a
+  # package of shell scripts that runs on any macOS.
+  ignore_run_exports:
+    - __osx  # [osx]
 
 requirements:
   build:
