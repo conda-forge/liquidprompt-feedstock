@@ -11,7 +11,7 @@ source:
   sha256: f752f46595519befd1ad83eaa3605cfc05babd485250a0b46916d8eacabf4f26
 
 build:
-  number: 0
+  number: 1
 
 requirements:
   build:
@@ -24,6 +24,11 @@ test:
   commands:
     - grep -q '${CONDA_PREFIX}' $PREFIX/etc/conda/activate.d/liquidprompt.sh  # [not win]
     - grep -q '${CONDA_PREFIX}' %PREFIX%\etc\conda\activate.d\liquidprompt.sh  # [win]
+    - grep -q 'LP_MARK_PREFIX' $PREFIX/etc/conda/activate.d/liquidprompt.sh  # [not win]
+    - grep -q 'LP_MARK_PREFIX' %PREFIX%\etc\conda\activate.d\liquidprompt.sh  # [win]
+    - grep -q 'LP_MARK_PREFIX' $PREFIX/etc/conda/deactivate.d/liquidprompt.sh  # [not win]
+    - grep -q 'LP_MARK_PREFIX' %PREFIX%\etc\conda\deactivate.d\liquidprompt.sh  # [win]
+    - '! grep -q export $PREFIX/etc/conda/activate.d/liquidprompt.sh'  # [not win]
 
 about:
   home: https://github.com/nojhan/liquidprompt
