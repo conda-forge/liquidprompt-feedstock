@@ -19,9 +19,9 @@ requirements:
     # MACOSX_DEPLOYMENT_TARGET, even though nothing here is compiled.
     - {{ stdlib('c') }}  # [osx]
     - sed  # [osx]
-    - posix  # [win]
+    - m2-base  # [win]
   run:
-    - posix  # [win]
+    - m2-base  # [win]
 
 test:
   commands:
