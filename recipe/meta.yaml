@@ -1,17 +1,18 @@
 {% set name = "liquidprompt" %}
-{% set version = "2.1.2" %}
+{% set version = "2.3.0" %}
 
 package:
   name: {{ name|lower }}
   version: {{ version }}
 
 source:
-  fn: {{ name }}-{{ version }}.tar.gz
-  url: https://github.com/{{ name }}/{{ name }}/archive/v{{ version }}.tar.gz
-  sha256: f752f46595519befd1ad83eaa3605cfc05babd485250a0b46916d8eacabf4f26
+  # The release asset, not the git archive: upstream only ships the generated
+  # example config (liquidpromptrc-dist) in the release tarball.
+  url: https://github.com/{{ name }}/{{ name }}/releases/download/v{{ version }}/{{ name }}-v{{ version }}.tar.gz
+  sha256: ff274d36f47f4fb6a34c6eb1eae2d58e51944a863b74031ff29c6c03ab011ec3
 
 build:
-  number: 1
+  number: 0
   # The c stdlib is only in the build requirements to satisfy the osx CI
   # build scripts; its run_exports would otherwise pin __osx >=11.0 on a
   # package of shell scripts that runs on any macOS.
@@ -30,12 +31,15 @@ requirements:
 
 test:
   commands:
+    - test -f $PREFIX/etc/liquidprompt/themes/unfold/unfold.theme  # [not win]
+    - test -f $PREFIX/etc/liquidprompt/themes/powerline/powerline.theme  # [not win]
+    - test -f $PREFIX/etc/liquidprompt/themes/alternate_vcs/alternate_vcs.theme  # [not win]
+    - if not exist %PREFIX%\Library\etc\liquidprompt\themes\unfold\unfold.theme exit 1  # [win]
     - grep -q '${CONDA_PREFIX}' $PREFIX/etc/conda/activate.d/liquidprompt.sh  # [not win]
     - grep -q '${CONDA_PREFIX}' %PREFIX%\etc\conda\activate.d\liquidprompt.sh  # [win]
-    - grep -q 'LP_MARK_PREFIX' $PREFIX/etc/conda/activate.d/liquidprompt.sh  # [not win]
-    - grep -q 'LP_MARK_PREFIX' %PREFIX%\etc\conda\activate.d\liquidprompt.sh  # [win]
-    - grep -q 'LP_MARK_PREFIX' $PREFIX/etc/conda/deactivate.d/liquidprompt.sh  # [not win]
-    - grep -q 'LP_MARK_PREFIX' %PREFIX%\etc\conda\deactivate.d\liquidprompt.sh  # [win]
+    - grep -q 'lp_theme unfold' $PREFIX/etc/conda/activate.d/liquidprompt.sh  # [not win]
+    - grep -q 'themes/\*/\*.theme' $PREFIX/etc/conda/activate.d/liquidprompt.sh  # [not win]
+    - grep -q 'lp_theme unfold' %PREFIX%\etc\conda\activate.d\liquidprompt.sh  # [win]
     - '! grep -q export $PREFIX/etc/conda/activate.d/liquidprompt.sh'  # [not win]
 
 about:

@@ -19,18 +19,13 @@ if [ ! -z ${windows} ]; then
   export bin_lp='$(cygpath ${CONDA_PREFIX})/Library/bin/liquidprompt'
 fi
 export activate_d=$PREFIX/etc/conda/activate.d
-export deactivate_d=$PREFIX/etc/conda/deactivate.d
 
 sed -e "s|/etc/liquidpromptrc|${etc_lp}rc|g" \
     -i \
     liquidprompt
-sed -e "s|~/.config/liquidprompt/nojhan.theme|${etc_lp}/liquid.theme|" \
-    -e "s|~/.config/liquidprompt/nojhan.ps1|${etc_lp}/liquid.ps1|" \
-    -i \
-    liquidpromptrc-dist
 
 mkdir -p ${prefix}/etc/liquidprompt
-cp liquid.ps1 liquid.theme ${prefix}/etc/liquidprompt
+cp -R themes templates ${prefix}/etc/liquidprompt
 cp liquidpromptrc-dist ${prefix}/etc/liquidpromptrc
 
 mkdir -p ${prefix}/bin
@@ -39,28 +34,21 @@ cp liquidprompt ${prefix}/bin
 mkdir -p ${activate_d}
 cat > ${activate_d}/liquidprompt.sh <<EOF
 if [[ \$- = *i* ]]; then
-    # Put the prompt mark on its own line. LP_MARK_PREFIX is liquidprompt's
-    # documented hook for this; it is applied before the liquidpromptrc is
-    # sourced, so a user config can still override it. Deliberately not
-    # exported: liquidprompt is sourced into this same shell, so a plain
-    # shell variable is enough, and the deactivate.d script below puts the
-    # shell back the way it found it.
-    if [[ -n \${LP_MARK_PREFIX+x} ]]; then
-        _LP_CONDA_SAVED_MARK_PREFIX=\$LP_MARK_PREFIX
-    fi
-    : \${LP_MARK_PREFIX=\$'\n'}
     source ${bin_lp}
-fi
-EOF
-
-mkdir -p ${deactivate_d}
-cat > ${deactivate_d}/liquidprompt.sh <<'EOF'
-if [[ $- = *i* ]]; then
-    if [[ -n ${_LP_CONDA_SAVED_MARK_PREFIX+x} ]]; then
-        LP_MARK_PREFIX=$_LP_CONDA_SAVED_MARK_PREFIX
-        unset _LP_CONDA_SAVED_MARK_PREFIX
-    else
-        unset LP_MARK_PREFIX
+    # Sourcing a theme file only defines the theme; lp_theme is what switches
+    # to it. Load every bundled theme so "lp_theme <name>" can switch between
+    # them on demand, then select unfold.
+    # https://liquidprompt.readthedocs.io/en/stable/theme.html#switching-themes
+    for _lp_conda_theme in ${etc_lp}/themes/*/*.theme; do
+        [[ -f \$_lp_conda_theme ]] && source "\$_lp_conda_theme"
+    done
+    unset _lp_conda_theme
+    # The unfold theme already renders the prompt mark on a line of its own, so
+    # this package no longer overrides LP_MARK_PREFIX to split the prompt.
+    # Only switch while the shell is still on the built-in theme, so a user who
+    # selected their own keeps it across a re-activation.
+    if [[ \${LP_THEME-} == default ]]; then
+        lp_theme unfold
     fi
 fi
 EOF
