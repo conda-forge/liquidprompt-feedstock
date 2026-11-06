@@ -11,19 +11,32 @@ source:
   sha256: f752f46595519befd1ad83eaa3605cfc05babd485250a0b46916d8eacabf4f26
 
 build:
-  number: 0
+  number: 1
+  # The c stdlib is only in the build requirements to satisfy the osx CI
+  # build scripts; its run_exports would otherwise pin __osx >=11.0 on a
+  # package of shell scripts that runs on any macOS.
+  ignore_run_exports:
+    - __osx  # [osx]
 
 requirements:
   build:
+    # Required by the osx CI build scripts whenever the config sets
+    # MACOSX_DEPLOYMENT_TARGET, even though nothing here is compiled.
+    - {{ stdlib('c') }}  # [osx]
     - sed  # [osx]
-    - posix  # [win]
+    - m2-base  # [win]
   run:
-    - posix  # [win]
+    - m2-base  # [win]
 
 test:
   commands:
     - grep -q '${CONDA_PREFIX}' $PREFIX/etc/conda/activate.d/liquidprompt.sh  # [not win]
     - grep -q '${CONDA_PREFIX}' %PREFIX%\etc\conda\activate.d\liquidprompt.sh  # [win]
+    - grep -q 'LP_MARK_PREFIX' $PREFIX/etc/conda/activate.d/liquidprompt.sh  # [not win]
+    - grep -q 'LP_MARK_PREFIX' %PREFIX%\etc\conda\activate.d\liquidprompt.sh  # [win]
+    - grep -q 'LP_MARK_PREFIX' $PREFIX/etc/conda/deactivate.d/liquidprompt.sh  # [not win]
+    - grep -q 'LP_MARK_PREFIX' %PREFIX%\etc\conda\deactivate.d\liquidprompt.sh  # [win]
+    - '! grep -q export $PREFIX/etc/conda/activate.d/liquidprompt.sh'  # [not win]
 
 about:
   home: https://github.com/nojhan/liquidprompt
