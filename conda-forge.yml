@@ -1,4 +1,5 @@
 provider:
+  linux_aarch64: default
   osx_arm64: default
   win: azure
 conda_forge_output_validation: true
